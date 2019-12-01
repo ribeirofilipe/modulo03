@@ -141,7 +141,6 @@ class AppointmentController {
 
     appointment.save();
 
-    console.log(CancellationMail.key);
     await Queue.add(CancellationMail.key, {
       appointment,
     });
