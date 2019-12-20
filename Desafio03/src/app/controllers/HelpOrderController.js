@@ -87,6 +87,13 @@ class HelpOrderController {
   async show(req, res) {
     const helpOrders = await HelpOrders.findAll({
       where: { answer: null },
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['name'],
+        },
+      ],
     });
 
     return res.json(helpOrders);

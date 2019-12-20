@@ -77,6 +77,16 @@ class StudentController {
       height,
     });
   }
+
+  async index(req, res) {
+    try {
+      const students = await Student.findAll();
+
+      return res.json(students);
+    } catch (err) {
+      return res.json({ error: 'Error to processing request.' });
+    }
+  }
 }
 
 export default new StudentController();

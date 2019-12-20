@@ -12,6 +12,7 @@ import isAdmin from './app/middlewares/admin';
 const routes = new Router();
 
 routes.post('/session', SessionController.store);
+routes.post('/users', UserController.store);
 
 routes.use(authMiddleware);
 
@@ -22,11 +23,11 @@ routes.delete('/plans/:id', PlanController.delete);
 
 routes.use(isAdmin);
 
-routes.post('/users', UserController.store);
 routes.get('/users', UserController.index);
 
 routes.post('/students', StudentController.store);
 routes.put('/student/:id', StudentController.update);
+routes.get('/students', StudentController.index);
 
 routes.post('/registrations', RegistrationController.store);
 routes.get('/registrations', RegistrationController.index);
