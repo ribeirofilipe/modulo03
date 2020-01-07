@@ -27,6 +27,18 @@ class PlanController {
     });
   }
 
+  async show(req, res) {
+    const { id } = req.params;
+
+    const plan = await Plan.findByPk(id);
+
+    if (!plan) {
+      return res.json({ error: 'Plan not found.' });
+    }
+
+    return res.json(plan);
+  }
+
   async update(req, res) {
     const { id } = req.params;
 
