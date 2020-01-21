@@ -20,7 +20,7 @@ routes.post('/plans', PlanController.store);
 routes.get('/plans', PlanController.index);
 routes.get('/plan/:id', PlanController.show);
 routes.put('/plans/:id', PlanController.update);
-routes.delete('/plans/:id', PlanController.delete);
+routes.delete('/plan/:id', PlanController.delete);
 
 routes.use(isAdmin);
 
@@ -32,10 +32,11 @@ routes.get('/students', StudentController.index);
 routes.get('/student/:id', StudentController.show);
 routes.delete('/student/:id', StudentController.delete);
 
-routes.post('/registrations', RegistrationController.store);
+routes.post('/registration', RegistrationController.store);
 routes.get('/registrations', RegistrationController.index);
-routes.put('/registrations/:id', RegistrationController.update);
-routes.delete('/registrations/:id', RegistrationController.delete);
+routes.put('/registration/:id', RegistrationController.update);
+routes.delete('/registration/:id', RegistrationController.delete);
+routes.get('/registration/:id', RegistrationController.show);
 
 routes.get('/students/:id/checkins', CheckinController.index);
 routes.post('/students/:id/checkins', CheckinController.store);

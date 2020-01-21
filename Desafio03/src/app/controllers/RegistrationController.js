@@ -26,6 +26,32 @@ class RegistrationController {
     return res.json(registration);
   }
 
+  async show(req, res) {
+    const { id } = req.params;
+
+    const registration = await Student.Registration(id, {
+      attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['name', 'email', 'age'],
+        },
+        {
+          model: Plan,
+          as: 'plan',
+          attributes: ['title', 'duration', 'price'],
+        },
+      ],
+    });
+
+    if (!registration) {
+      return res.json({ error: 'Student not found.' });
+    }
+
+    return res.json(registration);
+  }
+
   async update(req, res) {
     const { id } = req.params;
     const { student_id, plan_id } = req.query;
@@ -90,6 +116,12 @@ class RegistrationController {
 
     if (!student) {
       return res.status(400).json({ error: 'Student not found' });
+    }
+
+    const registrationFound = await Registration.findOne({ where: plan_id, student_id });
+
+    if (registrationFound) {
+      return res.status(400).json({ error: 'Registration already exists' });
     }
 
     const { duration, price } = plan;
