@@ -6,7 +6,7 @@ import HelpOrderNotify from '../jobs/HelpOrdersNotify';
 class HelpOrderController {
   async index(req, res) {
     const { id } = req.params;
-
+    
     if (!id) {
       return res.status(400).json({ error: 'Id invalid' });
     }
@@ -48,9 +48,7 @@ class HelpOrderController {
 
   async update(req, res) {
     const { id } = req.params;
-
-    console.log("AAAAAAAAAAAAAAAAAAAAA ID " + req.params);
-
+    const { answer } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: 'Id invalid' });
@@ -73,13 +71,16 @@ class HelpOrderController {
 
     helpOrders.answer_at = new Date();
 
-    const helpOrder = await helpOrders.update(req.body);
+    const helpOrder = await helpOrders.update({
+      answer,
+      answer_at: new Date(),
+    });
 
     await Queue.add(HelpOrderNotify.key, {
       helpOrder,
     });
 
-    const { question, answer, answer_at } = helpOrders;
+    const { question, answer_at } = helpOrders;
 
     return res.json({
       question,
