@@ -49,9 +49,13 @@ class HelpOrderController {
   async update(req, res) {
     const { id } = req.params;
 
+    console.log("AAAAAAAAAAAAAAAAAAAAA ID " + req.params);
+
+
     if (!id) {
       return res.status(400).json({ error: 'Id invalid' });
     }
+
 
     const helpOrders = await HelpOrders.findByPk(Number(id), {
       include: [

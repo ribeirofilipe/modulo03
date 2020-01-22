@@ -13,12 +13,12 @@ class RegistrationController {
         {
           model: Student,
           as: 'student',
-          attributes: ['name', 'email', 'age'],
+          attributes: ['id', 'name', 'email', 'age'],
         },
         {
           model: Plan,
           as: 'plan',
-          attributes: ['title', 'duration', 'price'],
+          attributes: ['id', 'title', 'duration', 'price'],
         },
       ],
     });
@@ -29,18 +29,18 @@ class RegistrationController {
   async show(req, res) {
     const { id } = req.params;
 
-    const registration = await Student.Registration(id, {
+    const registration = await Registration.findByPk(id, {
       attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
       include: [
         {
           model: Student,
           as: 'student',
-          attributes: ['name', 'email', 'age'],
+          attributes: ['id', 'name', 'email', 'age'],
         },
         {
           model: Plan,
           as: 'plan',
-          attributes: ['title', 'duration', 'price'],
+          attributes: ['id', 'title', 'duration', 'price'],
         },
       ],
     });
@@ -84,6 +84,8 @@ class RegistrationController {
 
     const { active } = await registration.update({
       start_date,
+      plan_id,
+      student_id,
       end_date,
       price: price * duration,
     });
@@ -97,55 +99,56 @@ class RegistrationController {
   }
 
   async store(req, res) {
-    const { plan_id, student_id } = req.query;
-    const { start_date } = req.body;
+    try {
+      
 
-    if (!plan_id || !student_id) {
-      return res
-        .status(400)
-        .json({ error: 'Plan id or student id is invalid' });
+      const { plan_id, student_id } = req.query;
+      const { start_date } = req.body;
+  
+      if (!plan_id || !student_id) {
+        return res
+          .status(400)
+          .json({ error: 'Plan id or student id is invalid' });
+      }
+  
+      const plan = await Plan.findOne({ where: { id: plan_id } });
+  
+      if (!plan) {
+        return res.status(400).json({ error: 'Plan not found' });
+      }
+  
+      const student = await Student.findOne({ where: { id: student_id } });
+  
+      if (!student) {
+        return res.status(400).json({ error: 'Student not found' });
+      }
+
+      const { duration, price } = plan;
+  
+      const end_date = format(
+        addDays(parseISO(start_date), duration * 30),
+        'yyyy-MM-dd'
+      );
+  
+      const registration = await Registration.create({
+        student_id,
+        plan_id,
+        start_date,
+        end_date,
+        price: price * duration,
+      });
+
+      await Queue.add(RegistrationNotify.key, {
+        registration,
+        plan,
+        student,
+      });
+  
+      return res.json(registration);
+    } catch (err) {
+      return res.json(err)
     }
-
-    const plan = await Plan.findOne({ where: { id: plan_id } });
-
-    if (!plan) {
-      return res.status(400).json({ error: 'Plan not found' });
-    }
-
-    const student = await Student.findOne({ where: { id: student_id } });
-
-    if (!student) {
-      return res.status(400).json({ error: 'Student not found' });
-    }
-
-    const registrationFound = await Registration.findOne({ where: plan_id, student_id });
-
-    if (registrationFound) {
-      return res.status(400).json({ error: 'Registration already exists' });
-    }
-
-    const { duration, price } = plan;
-
-    const end_date = format(
-      addDays(parseISO(start_date), duration * 30),
-      'yyyy-MM-dd'
-    );
-
-    const registration = await Registration.create({
-      student_id,
-      plan_id,
-      start_date,
-      end_date,
-      price: price * duration,
-    });
-
-    await Queue.add(RegistrationNotify.key, {
-      registration,
-      plan,
-      student,
-    });
-
-    return res.json(registration);
+    
   }
 
   async delete(req, res) {
